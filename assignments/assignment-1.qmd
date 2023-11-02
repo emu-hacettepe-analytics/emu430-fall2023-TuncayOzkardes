@@ -4,12 +4,32 @@ title: "Assignment 1"
 
 # Assignment 1
 
-```{r}
-1 + 1
-```
-
-My first assignment has two parts.
+My first assignment has 3 parts.
 
 ## (a)
 
+Posit Cloud is an online data sharing platform. Now, this platform has a new feature called data collections that provides securely store database credentials.
+
 ## (b)
+
+I tought that Python is more like English than any other programming language. However, after learning R, I think R is more English now. The most confusing thing was we use "\<-" instead of "=". The second thing is indexes start at 1 instead of 0. Third thing is, python is designed for general purposes and R designed for analyzing data and the ecosystems change do to that.
+
+## (c)
+
+```{r}
+library(dslabs)
+data1 <- na_example
+data1
+sum(is.na(data1))
+```
+
+```{r}
+data2 <- data1
+data2[is.na(data2)]<-0
+data2
+sum(is.na(data2))
+```
+
+```{r}
+
+```

@@ -3,10 +3,10 @@ title: "Our Course Project"
 sidebar: false 
 ---
 
-I'm honored to be a member of the \[group name\] project team.
+I'm honored to be a member of the "Germen Obasi" project team.
 
-Below, you'll find a brief summary of our project. To access a detailed project description, please go to [https://\[your-project-url\]](#0){.uri}.
+Below, you'll find a brief summary of our project. To access a detailed project description, please go to <https://github.com/emu-hacettepe-analytics/emu430-fall2023-team-germen_obasi>.
 
 **Summary**
 
-\[provide a biref summary of your project\]
+Our goal is to merge two different datasets into one. We began by importing the Literacy data into R. After importing it, we transposed the data. Within the transposed dataset, we extracted percentage values and restructured the column names. Similarly, we imported the Population data into R, removing irrelevant years that didn't align with the other dataset. Upon transposing this data and excluding unmatched age groups, we merged male and female populations, as gender analysis wasn't our focus. For consistency with the happiness dataset, we adjusted and combined the 15-19 age group by taking 2/5 of it. Finally, we organized the column names. Following this, we imported the Happiness data into R. To synchronize the years with other datasets, we excluded entries before 2008 and removed rows with missing values (NA). We transformed the rows into a wider format, retaining only the years, and then organized the column names accordingly. In the final step, we merged the Literacy and Population datasets. We integrated the Happiness data into this new table and rearranged the column positions for a comprehensive dataset.

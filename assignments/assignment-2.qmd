@@ -4,6 +4,191 @@ title: "Assignment 2"
 
 # Assignment 2
 
-```{r}
-1 + 1
+## Extracting the data from Web
+
+```         
+library(tidyverse)
+library(rvest)
+library(stringr)
+library(ggplot2)
+
+# URLs
+url1 <- "https://m.imdb.com/search/title/?title_type=feature&release_date=2011-01-01,2023-12-31&sort=moviemeter,desc&num_votes=2499,&countries=TR&count=250"  # Replace with the actual URL you want to scrape
+url2 <- "https://m.imdb.com/search/title/?title_type=feature&release_date=,2010-12-31&sort=moviemeter,desc&num_votes=2500,&countries=TR&count=250"
+
+content1 <- read_html(url1)
+content2 <- read_html(url2)
+
+# Function to convert duration to minutes
+convert_duration <- function(duration) {
+  parts <- str_match(duration, "(\\d+)h (\\d+)m")
+  if (!is.na(parts[1,1])) {
+    hours <- as.integer(parts[2])
+    minutes <- as.integer(parts[3])
+    total_minutes <- hours * 60 + minutes
+    return(total_minutes)
+  } else {
+    return(NA)
+  }
+}
+
+# Function to extract movie data
+extract_movie_data <- function(url) {
+  page <- read_html(url)
+  
+  # Extracting movie titles
+  titles <- page %>%
+    html_nodes(".lister-item-header a") %>%
+    html_text()
+  
+  # Extracting movie ratings
+  ratings_text <- page %>%
+    html_nodes(".ratings-imdb-rating strong") %>%
+    html_text()
+  
+  ratings <- as.numeric(str_extract(ratings_text, "\\d+\\.\\d+"))
+  
+  # Extracting movie duration
+  durations_text <- page %>%
+    html_nodes(".runtime") %>%
+    html_text()
+  
+  durations <- sapply(durations_text, convert_duration)
+  
+  # Extracting movie votes
+  votes_text <- page %>%
+    html_nodes(".sort-num_votes-visible span:nth-child(2)") %>%
+    html_text()
+  
+  votes <- as.numeric(str_replace_all(votes_text, "[^0-9]", ""))
+  
+  # Extracting movie release years
+  release_years <- page %>%
+    html_nodes(".lister-item-year") %>%
+    html_text() %>%
+    gsub("\\D+", "", .) %>%
+    as.integer()
+  
+  # Creating a data frame
+  movie_data <- data.frame(
+    Title = titles,
+    Rating = ratings,
+    Duration_Minutes = durations,
+    Votes = votes,
+    Release_Year = release_years
+  )
+  
+  return(movie_data)
+}
+
+# Extract data from URL 1
+data_from_url1 <- extract_movie_data(url1)
+
+# Extract data from URL 2
+data_from_url2 <- extract_movie_data(url2)
+
+combined_data <- rbind(data_from_url1, data_from_url2)
+```
+
+## 3.a
+
+```         
+# Sort by Rating in descending order
+sorted_combined_data <- combined_data[order(combined_data$Rating, decreasing = TRUE), ]
+
+# Top 5 movies based on ratings
+top_5_movies_combined <- head(sorted_combined_data, 5)
+
+# Bottom 5 movies based on ratings
+bottom_5_movies_combined <- tail(sorted_combined_data, 5)
+```
+
+I really never watched one of them before. However, I will give them a chance.
+
+## 3.b
+
+My favorite Movies are A.R.O.G. and Illegal Lives. I did not expect that Illegal Lives is that high rated.
+
+```         
+desired_movies <- combined_data %>%
+  filter(Title %in% c("A.R.O.G.", "Illegal Lives"))
+```
+
+## 3.c
+
+```         
+
+# Calculate yearly rating averages
+rating_averages <- combined_data %>%
+  group_by(Release_Year) %>%
+  summarise(Average_Rating = mean(Rating, na.rm = TRUE),
+            Number_of_Movies = n())
+
+# Plotting yearly rating averages as a scatter plot
+ggplot(rating_averages, aes(x = Release_Year, y = Average_Rating, size = Number_of_Movies)) +
+  geom_point() +
+  labs(x = "Release Year", y = "Average Rating", title = "Average Ratings of Turkish Movies Over the Years") +
+  theme_minimal()
+
+# Plotting the number of movies over the years
+ggplot(rating_averages, aes(x = Release_Year, y = Number_of_Movies)) +
+  geom_bar(stat = "identity", fill = "blue") +
+  labs(x = "Release Year", y = "Number of Movies", title = "Number of Turkish Movies Released Over the Years")
+
+# Plotting box plots of ratings over the years
+ggplot(combined_data, aes(x = as.factor(Release_Year), y = Rating)) +
+  geom_boxplot(fill = "green") +
+  labs(x = "Release Year", y = "Rating", title = "Box Plot")
+```
+
+## 3.d
+
+```         
+# Calculate the correlation between Votes and Ratings
+correlation <- cor(combined_data$Votes, combined_data$Rating, use = "complete.obs")
+
+# Display the correlation coefficient
+print(paste("Correlation between Votes and Ratings:", correlation))
+```
+
+## 4
+
+```         
+url3 <- "https://www.imdb.com/search/title/?title_type=feature&groups=top_1000&country_of_origin=TR"
+content3 <- read_html(url3)
+
+
+extract_top_1000_movies <- function(content) {
+  # Extracting movie titles
+  titles <- content %>%
+    html_nodes(".lister-item-header a") %>%
+    html_text()
+  
+  # Extracting movie years
+  years <- content %>%
+    html_nodes(".lister-item-year") %>%
+    html_text() %>%
+    gsub("[()]", "", .) # Remove parentheses from the year
+  
+  # Creating a data frame
+  top_1000_movies <- data.frame(
+    Title = titles,
+    Year = years
+  )
+  
+  return(top_1000_movies)
+}
+
+# Extract data from content3
+data_from_content3 <- extract_top_1000_movies(content3)
+
+
+# Perform an inner join to merge the data
+merged_data <- inner_join(data_from_content3, combined_data, by = "Title")
+
+# Sort the merged data by Rank
+ranked_data <- merged_data[order(merged_data$Rank), ]
+
+# Select the Top 11
+top_11 <- head(ranked_data, 11)
 ```
